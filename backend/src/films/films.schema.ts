@@ -4,11 +4,11 @@ import { Document } from 'mongoose';
 export type FilmDocument = Film & Document;
 export type ScheduleDocument = Schedule & Document;
 
-@Schema()
+@Schema({ _id: true })
 export class Schedule {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   id: string;
-  // id: Types.ObjectId;
+
   @Prop({ required: true })
   daytime: string;
 
@@ -29,12 +29,10 @@ export class Schedule {
 }
 export const ScheduleSchema = SchemaFactory.createForClass(Schedule);
 
-@Schema()
+@Schema({ _id: true })
 export class Film {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   id: string;
-  // _id?: Types.ObjectId;
-
   @Prop({ required: true })
   rating: number;
 
@@ -64,3 +62,19 @@ export class Film {
 }
 
 export const FilmSchema = SchemaFactory.createForClass(Film);
+
+FilmSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: (_, ret) => {
+    delete ret._id;
+  },
+});
+
+ScheduleSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: (_, ret) => {
+    delete ret._id;
+  },
+});

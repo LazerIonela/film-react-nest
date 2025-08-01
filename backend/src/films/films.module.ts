@@ -11,6 +11,5 @@ import { FilmsService } from './films.service';
   ],
   controllers: [FilmsController],
   providers: [FilmsService, FilmsRepository],
-  exports: [FilmsRepository],
 })
 export class FilmsModule {}
