@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Film, FilmSchema } from './films.schema';
 import { FilmsController } from './films.controller';
-import { FilmsRepository } from '../repository/films.repository';
 import { FilmsService } from './films.service';
+import { FilmsRepository } from '../repository/films.repository';
 
 @Module({
   imports: [
@@ -11,5 +11,6 @@ import { FilmsService } from './films.service';
   ],
   controllers: [FilmsController],
   providers: [FilmsService, FilmsRepository],
+  exports: [FilmsRepository],
 })
 export class FilmsModule {}

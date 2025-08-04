@@ -1,24 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
-export type OrderDocument = Order & Document;
+export type OrderDocument = HydratedDocument<Order>;
 
-@Schema({ _id: true })
+@Schema()
 export class Ticket {
-  @Prop({ required: true, unique: true })
-  id: string;
   @Prop({ required: true })
   film: string;
   @Prop({ required: true })
   session: string;
   @Prop({ required: true })
-  dayTime: Date;
+  dayTime: string;
+  @Prop({ required: true })
+  day: string;
+  @Prop({ required: true })
+  time: string;
   @Prop({ required: true })
   hall: number;
   @Prop({ required: true })
+  row: number;
+  @Prop({ required: true })
+  seat: number;
+  @Prop({ required: true })
   price: number;
-  @Prop({ type: [String], default: [] })
-  taken: string[];
 }
 export const TicketSchema = SchemaFactory.createForClass(Ticket);
 
