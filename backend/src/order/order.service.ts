@@ -3,13 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import {
-  CreateOrderDTO,
-  OrderResponseDTO,
-  TicketDetailDTO,
-} from './dto/order.dto';
-// import { Order } from './order.schema';
-// import { v4 as uuidv4 } from 'uuid';
+import { OrderResponseDTO, TicketDetailDTO } from './dto/order.dto';
 import { FilmsRepository } from 'src/repository/films.repository';
 import { FilmDTO } from 'src/films/dto/films.dto';
 @Injectable()

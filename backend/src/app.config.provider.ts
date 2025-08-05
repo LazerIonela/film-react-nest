@@ -1,10 +1,11 @@
 import { ConfigModule } from '@nestjs/config';
 
+export const ConfigToken = 'CONFIG';
+
 export const configProvider = {
   imports: [ConfigModule.forRoot()],
-  provide: 'CONFIG',
+  provide: ConfigToken,
   useValue: <AppConfig>{
-    //TODO прочесть переменнные среды
     database: {
       driver: process.env.DATABASE_DRIVER || 'mongodb',
       url: process.env.DATABASE_URL || 'mongodb://localhost:27017/afisha',
