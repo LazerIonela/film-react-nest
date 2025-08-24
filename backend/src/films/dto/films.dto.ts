@@ -31,7 +31,7 @@ export class FilmDTO {
   description: string;
 
   @IsArray()
-  schedule: ScheduleDTO[];
+  schedules: ScheduleDTO[];
 }
 
 export class ScheduleDTO {

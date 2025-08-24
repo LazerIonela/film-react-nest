@@ -33,7 +33,7 @@ export class OrderService {
         updatedFilms.set(filmId, film);
       }
 
-      const schedule = film.schedule.find((s) => s.id === sessionId);
+      const schedule = film.schedules.find((s) => s.id === sessionId);
       if (!schedule) {
         throw new NotFoundException(`Сеанс не найден: ${sessionId}`);
       }

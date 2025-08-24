@@ -1,27 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { FilmDTO } from 'src/films/dto/films.dto';
-import { Film, FilmDocument } from 'src/films/films.schema';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Film } from '../films/entities/films.entity';
+import { Schedule } from 'src/films/films.schema';
 
 @Injectable()
 export class FilmsRepository {
-  constructor(@InjectModel(Film.name) private filmModel: Model<FilmDocument>) {}
+  constructor(
+    @InjectRepository(Film) private filmRepository: Repository<Film>,
+    @InjectRepository(Schedule)
+    private scheduleRepository: Repository<Schedule>,
+  ) {}
 
-  async findAll(): Promise<FilmDTO[]> {
-    return await this.filmModel.find();
+  async findAll(): Promise<Film[]> {
+    return await this.filmRepository.find({
+      relations: ['schedules'],
+    });
   }
-  async findById(id: string): Promise<FilmDocument | null> {
-    return await this.filmModel.findOne({ id });
+  async findById(id: string): Promise<Film | null> {
+    return await this.filmRepository.findOne({
+      where: { id },
+      relations: ['schedules'],
+    });
   }
-  async updateFilmSession(
-    filmId: string,
-    sessionId: string,
-    takenSeats: string[],
-  ): Promise<void> {
-    await this.filmModel.updateOne(
-      { id: filmId, 'schedule.id': sessionId },
-      { $set: { 'schedule.$.taken': takenSeats } },
-    );
+  async updateFilmSession(film: Film): Promise<void> {
+    try {
+      await this.filmRepository.save(film);
+    } catch (error) {
+      new BadRequestException(`Не удалось обновить фильм ${film.title}`);
+    }
   }
 }

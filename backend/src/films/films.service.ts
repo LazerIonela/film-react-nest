@@ -20,8 +20,8 @@ export class FilmsService {
       throw new NotFoundException('Film not found');
     }
     return {
-      total: film.schedule.length,
-      items: film.schedule,
+      total: film.schedules.length,
+      items: film.schedules,
     };
   }
 }
