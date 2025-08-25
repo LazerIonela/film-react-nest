@@ -3,66 +3,47 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { OrderResponseDTO, TicketDetailDTO } from './dto/order.dto';
+import {
+  OrderResponseDTO,
+  TicketDetailDTO,
+  CreateOrderDTO,
+} from './dto/order.dto';
 import { FilmsRepository } from 'src/repository/films.repository';
-import { FilmDTO } from 'src/films/dto/films.dto';
 @Injectable()
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
-  async createOrder(tickets: TicketDetailDTO[]): Promise<OrderResponseDTO> {
-    const updatedFilms = new Map<string, FilmDTO>();
-    const orderTickets: TicketDetailDTO[] = [];
+  async createOrder(orderDto: CreateOrderDTO): Promise<OrderResponseDTO> {
+    const items: TicketDetailDTO[] = [];
 
-    for (const ticket of tickets) {
-      const {
-        film: filmId,
-        session: sessionId,
-        dayTime,
-        row,
-        seat,
-        price,
-      } = ticket;
-
-      let film = updatedFilms.get(filmId);
-      if (!film) {
-        film = await this.filmsRepository.findById(filmId);
-        if (!film) {
-          throw new NotFoundException(`Фильм не найден: ${filmId}`);
-        }
-        updatedFilms.set(filmId, film);
-      }
-
-      const schedule = film.schedules.find((s) => s.id === sessionId);
-      if (!schedule) {
-        throw new NotFoundException(`Сеанс не найден: ${sessionId}`);
-      }
-
+    for (const ticket of orderDto.tickets) {
+      const { film, session, row, seat, price, dayTime } = ticket;
       const seatKey = `${row}:${seat}`;
 
-      if (!Array.isArray(schedule.taken)) {
-        schedule.taken = [];
+      const filmEntity = await this.filmsRepository.findById(film);
+      if (!filmEntity) {
+        throw new NotFoundException(`Фильм с id ${film} не найден`);
       }
 
+      const schedule = await this.filmsRepository.findScheduleById(session);
+
+      // Проверяем занятость места
+      schedule.taken = schedule.taken || [];
       if (schedule.taken.includes(seatKey)) {
-        throw new ConflictException(`Место ${seatKey} уже занято`);
+        throw new ConflictException(
+          `Место ${seatKey} уже занято на сеансе ${session}`,
+        );
       }
 
+      // Добавляем место в taken и сохраняем
       schedule.taken.push(seatKey);
+      await this.filmsRepository.updateFilmSession(session, schedule.taken);
 
-      orderTickets.push({
-        film: filmId,
-        session: sessionId,
-        dayTime,
-        row,
-        seat,
-        price,
-      });
+      items.push({ film, session, dayTime, row, seat, price });
     }
 
-    return {
-      total: orderTickets.length,
-      items: orderTickets,
-    };
+    const total = items.reduce((sum, ticket) => sum + ticket.price, 0);
+
+    return { total, items };
   }
 }

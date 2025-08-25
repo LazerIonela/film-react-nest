@@ -1,8 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Film } from '../films/entities/films.entity';
-import { Schedule } from 'src/films/films.schema';
+import { Schedule } from '../films/entities/schedule.entity';
 
 @Injectable()
 export class FilmsRepository {
@@ -14,20 +14,26 @@ export class FilmsRepository {
 
   async findAll(): Promise<Film[]> {
     return await this.filmRepository.find({
-      relations: ['schedules'],
+      relations: ['schedule'],
     });
   }
-  async findById(id: string): Promise<Film | null> {
+  async findById(filmId: string): Promise<Film | null> {
     return await this.filmRepository.findOne({
-      where: { id },
-      relations: ['schedules'],
+      where: { id: filmId },
+      relations: ['schedule'],
     });
   }
-  async updateFilmSession(film: Film): Promise<void> {
-    try {
-      await this.filmRepository.save(film);
-    } catch (error) {
-      new BadRequestException(`Не удалось обновить фильм ${film.title}`);
-    }
+
+  async findScheduleById(sessionId: string): Promise<Schedule> {
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: sessionId },
+    });
+    if (!schedule)
+      throw new NotFoundException(`Сеанс с id ${sessionId} не найден`);
+    return schedule;
   }
+
+  async updateFilmSession(sessionId: string, taken: string[]): Promise<void> {
+  await this.scheduleRepository.update(sessionId, { taken });
+}
 }

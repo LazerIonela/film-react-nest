@@ -14,7 +14,8 @@ import { Schedule } from './films/entities/schedule.entity';
         port: parseInt(configService.get<string>('DATABASE_PORT'), 10),
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
-        database: configService.get<string>('DB_NAME') || 'film-react-nest',
+        database:
+          configService.get<string>('DATABASE_NAME') || 'film-react-nest',
         entities: [Film, Schedule],
         // synchronize: true,
       }),
