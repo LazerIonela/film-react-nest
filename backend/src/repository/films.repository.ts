@@ -14,13 +14,13 @@ export class FilmsRepository {
 
   async findAll(): Promise<Film[]> {
     return await this.filmRepository.find({
-      relations: ['schedule'],
+      relations: ['schedules'],
     });
   }
   async findById(filmId: string): Promise<Film | null> {
     return await this.filmRepository.findOne({
       where: { id: filmId },
-      relations: ['schedule'],
+      relations: ['schedules'],
     });
   }
 
@@ -34,6 +34,7 @@ export class FilmsRepository {
   }
 
   async updateFilmSession(sessionId: string, taken: string[]): Promise<void> {
-  await this.scheduleRepository.update(sessionId, { taken });
-}
+    await this.scheduleRepository.update(sessionId, { taken });
+    console.log({ sessionId, taken });
+  }
 }

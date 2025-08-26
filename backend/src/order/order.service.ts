@@ -27,7 +27,6 @@ export class OrderService {
 
       const schedule = await this.filmsRepository.findScheduleById(session);
 
-      // Проверяем занятость места
       schedule.taken = schedule.taken || [];
       if (schedule.taken.includes(seatKey)) {
         throw new ConflictException(
@@ -35,7 +34,6 @@ export class OrderService {
         );
       }
 
-      // Добавляем место в taken и сохраняем
       schedule.taken.push(seatKey);
       await this.filmsRepository.updateFilmSession(session, schedule.taken);
 

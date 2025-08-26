@@ -8,7 +8,7 @@ export class OrderController {
 
   @Post()
   async createOrder(@Body() orderData: CreateOrderDTO) {
-    const result = await this.orderService.createOrder(orderData.tickets);
+    const result = await this.orderService.createOrder(orderData);
     return result;
   }
 }
