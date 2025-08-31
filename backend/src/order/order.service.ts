@@ -1,47 +1,47 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
-import {
-  OrderResponseDTO,
-  TicketDetailDTO,
-  CreateOrderDTO,
-} from './dto/order.dto';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { CreateOrderDTO, TicketDetailDTO } from './dto/order.dto';
 import { FilmsRepository } from 'src/repository/films.repository';
+import { faker } from '@faker-js/faker';
+
 @Injectable()
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
-
-  async createOrder(orderDto: CreateOrderDTO): Promise<OrderResponseDTO> {
-    const items: TicketDetailDTO[] = [];
-
-    for (const ticket of orderDto.tickets) {
-      const { film, session, row, seat, price, dayTime } = ticket;
-      const seatKey = `${row}:${seat}`;
-
-      const filmEntity = await this.filmsRepository.findById(film);
-      if (!filmEntity) {
-        throw new NotFoundException(`Фильм с id ${film} не найден`);
+  async createOrder(orderData: CreateOrderDTO): Promise<TicketDetailDTO[]> {
+    let tickets: TicketDetailDTO[] = [];
+    for (const ticket of orderData.tickets) {
+      const { film, session, row, seat } = ticket;
+      const currentFilm = await this.filmsRepository.findById(film);
+      if (!currentFilm) {
+        throw new BadRequestException(`Фильм с id=${film} не найден`);
       }
-
-      const schedule = await this.filmsRepository.findScheduleById(session);
-
-      schedule.taken = schedule.taken || [];
-      if (schedule.taken.includes(seatKey)) {
-        throw new ConflictException(
-          `Место ${seatKey} уже занято на сеансе ${session}`,
-        );
+      const schedule = currentFilm.schedules.find((s) => s.id === session);
+      if (!schedule) {
+        throw new BadRequestException(`Сеанс с id ${session} не найден`);
       }
+      const takenSeat = `${row}:${seat}`;
+      if (schedule.taken?.includes(takenSeat)) {
+        throw new BadRequestException(`Место ${takenSeat} занято`);
+      }
+      schedule.taken = schedule.taken + ',' + takenSeat;
 
-      schedule.taken.push(seatKey);
-      await this.filmsRepository.updateFilmSession(session, schedule.taken);
-
-      items.push({ film, session, dayTime, row, seat, price });
+      await this.filmsRepository.updateFilmSession(
+        film,
+        session,
+        schedule.taken,
+      );
+      tickets = [
+        ...tickets,
+        {
+          id: faker.string.uuid(),
+          film,
+          session,
+          row,
+          seat,
+          dayTime: schedule.daytime,
+          price: schedule.price,
+        },
+      ];
     }
-
-    const total = items.reduce((sum, ticket) => sum + ticket.price, 0);
-
-    return { total, items };
+    return tickets;
   }
 }

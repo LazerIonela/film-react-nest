@@ -12,8 +12,8 @@ export class Film {
   @Column()
   director: string;
 
-  @Column('text', { array: true })
-  tags: string[];
+  @Column()
+  tags: string;
 
   @Column()
   image: string;
@@ -24,10 +24,10 @@ export class Film {
   @Column()
   title: string;
 
-  @Column('text')
+  @Column()
   about: string;
 
-  @Column('text')
+  @Column()
   description: string;
 
   @OneToMany(() => Schedule, (schedule) => schedule.film)
