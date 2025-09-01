@@ -1,16 +1,25 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { CreateOrderDTO, TicketDetailDTO } from './dto/order.dto';
+import {
+  CreateOrderDTO,
+  // CreateOrderDTO,
+  OrderResponseDTO,
+  TicketDetailDTO,
+} from './dto/order.dto';
 import { FilmsRepository } from 'src/repository/films.repository';
-import { faker } from '@faker-js/faker';
 
 @Injectable()
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
-  async createOrder(orderData: CreateOrderDTO): Promise<TicketDetailDTO[]> {
-    let tickets: TicketDetailDTO[] = [];
-    for (const ticket of orderData.tickets) {
+
+  // async createOrder(tickets: TicketDetailDTO[]): Promise<OrderResponseDTO> {
+  async createOrder(order: CreateOrderDTO): Promise<OrderResponseDTO> {
+    const orderTickets: TicketDetailDTO[] = [];
+
+    for (const ticket of order.tickets) {
       const { film, session, row, seat } = ticket;
+
       const currentFilm = await this.filmsRepository.findById(film);
+
       if (!currentFilm) {
         throw new BadRequestException(`Фильм с id=${film} не найден`);
       }
@@ -18,30 +27,30 @@ export class OrderService {
       if (!schedule) {
         throw new BadRequestException(`Сеанс с id ${session} не найден`);
       }
-      const takenSeat = `${row}:${seat}`;
-      if (schedule.taken?.includes(takenSeat)) {
-        throw new BadRequestException(`Место ${takenSeat} занято`);
-      }
-      schedule.taken = schedule.taken + ',' + takenSeat;
+      const seatKey = `${row}:${seat}`;
 
-      await this.filmsRepository.updateFilmSession(
+      if (schedule.taken?.includes(seatKey)) {
+        throw new BadRequestException(`Место ${seatKey} занято`);
+      }
+
+      schedule.taken = schedule.taken
+        ? `${schedule.taken},${seatKey}`
+        : seatKey;
+
+      await this.filmsRepository.updateFilmSession(session, schedule.taken);
+      orderTickets.push({
         film,
         session,
-        schedule.taken,
-      );
-      tickets = [
-        ...tickets,
-        {
-          id: faker.string.uuid(),
-          film,
-          session,
-          row,
-          seat,
-          dayTime: schedule.daytime,
-          price: schedule.price,
-        },
-      ];
+        row,
+        seat,
+        dayTime: schedule.daytime,
+        price: schedule.price,
+      });
     }
-    return tickets;
+
+    return {
+      total: orderTickets.length,
+      items: orderTickets,
+    };
   }
 }

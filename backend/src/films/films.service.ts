@@ -8,7 +8,6 @@ export class FilmsService {
 
   async getAllFilms() {
     const films = await this.filmsRepository.findAll();
-
     return {
       total: films.length,
       items: films,

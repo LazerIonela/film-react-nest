@@ -14,6 +14,8 @@ export class Film {
 
   @Column()
   tags: string;
+  // @Column('simple-array')
+  // tags: string[];
 
   @Column()
   image: string;

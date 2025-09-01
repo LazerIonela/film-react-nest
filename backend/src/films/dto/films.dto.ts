@@ -12,6 +12,7 @@ export class FilmDTO {
   director: string;
 
   @IsArray()
+  @IsString({ each: true })
   tags: string[];
 
   @IsString()
@@ -53,21 +54,22 @@ export class ScheduleDTO {
   price: number;
 
   @IsArray()
+  @IsString({ each: true })
   taken: string[];
 }
 
-// export class FilmResponseDTO {
-//   @IsNumber()
-//   total: number;
+export class FilmResponseDTO {
+  @IsNumber()
+  total: number;
 
-//   @IsArray()
-//   items: FilmDTO[];
-// }
+  @IsArray()
+  items: FilmDTO[];
+}
 
-// export class ScheduleResponseDTO {
-//   @IsNumber()
-//   total: number;
+export class ScheduleResponseDTO {
+  @IsNumber()
+  total: number;
 
-//   @IsArray()
-//   items: ScheduleDTO[];
-// }
+  @IsArray()
+  items: ScheduleDTO[];
+}

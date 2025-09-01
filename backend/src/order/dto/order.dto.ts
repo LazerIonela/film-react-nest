@@ -6,14 +6,9 @@ import {
   IsString,
   IsPhoneNumber,
   IsDateString,
-  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 export class TicketDetailDTO {
-  @IsString()
-  id: string;
-
   @IsString()
   film: string;
 
@@ -35,8 +30,6 @@ export class TicketDetailDTO {
 
 export class CreateOrderDTO {
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TicketDetailDTO)
   tickets: TicketDetailDTO[];
 
   @IsEmail()
@@ -51,7 +44,5 @@ export class OrderResponseDTO {
   total: number;
 
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TicketDetailDTO)
   items: TicketDetailDTO[];
 }

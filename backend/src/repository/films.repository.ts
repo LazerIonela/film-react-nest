@@ -24,14 +24,8 @@ export class FilmsRepository {
     });
   }
 
-  async updateFilmSession(
-    film: string,
-    session: string,
-    seats: string,
-  ): Promise<void> {
-    await this.scheduleRepository.update(
-      { id: session, film: { id: film } },
-      { taken: seats },
-    );
+  async updateFilmSession(sessionId: string, taken: string): Promise<void> {
+    await this.scheduleRepository.update(sessionId, { taken });
+    console.log({ sessionId, taken });
   }
 }

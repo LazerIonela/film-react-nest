@@ -23,6 +23,8 @@ export class Schedule {
 
   @Column()
   taken: string;
+  // @Column('text', { array: true })
+  // taken: string[];
 
   @ManyToOne(() => Film, (film) => film.schedules)
   film: Film;
