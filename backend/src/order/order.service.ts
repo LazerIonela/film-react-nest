@@ -1,62 +1,50 @@
+import { Injectable, BadRequestException } from '@nestjs/common';
 import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
-import { OrderResponseDTO, TicketDetailDTO } from './dto/order.dto';
+  CreateOrderDTO,
+  // CreateOrderDTO,
+  OrderResponseDTO,
+  TicketDetailDTO,
+} from './dto/order.dto';
 import { FilmsRepository } from 'src/repository/films.repository';
-import { FilmDTO } from 'src/films/dto/films.dto';
+
 @Injectable()
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
-  async createOrder(tickets: TicketDetailDTO[]): Promise<OrderResponseDTO> {
-    const updatedFilms = new Map<string, FilmDTO>();
+  // async createOrder(tickets: TicketDetailDTO[]): Promise<OrderResponseDTO> {
+  async createOrder(order: CreateOrderDTO): Promise<OrderResponseDTO> {
     const orderTickets: TicketDetailDTO[] = [];
 
-    for (const ticket of tickets) {
-      const {
-        film: filmId,
-        session: sessionId,
-        dayTime,
-        row,
-        seat,
-        price,
-      } = ticket;
+    for (const ticket of order.tickets) {
+      const { film, session, row, seat } = ticket;
 
-      let film = updatedFilms.get(filmId);
-      if (!film) {
-        film = await this.filmsRepository.findById(filmId);
-        if (!film) {
-          throw new NotFoundException(`Фильм не найден: ${filmId}`);
-        }
-        updatedFilms.set(filmId, film);
+      const currentFilm = await this.filmsRepository.findById(film);
+
+      if (!currentFilm) {
+        throw new BadRequestException(`Фильм с id=${film} не найден`);
       }
-
-      const schedule = film.schedule.find((s) => s.id === sessionId);
+      const schedule = currentFilm.schedules.find((s) => s.id === session);
       if (!schedule) {
-        throw new NotFoundException(`Сеанс не найден: ${sessionId}`);
+        throw new BadRequestException(`Сеанс с id ${session} не найден`);
       }
-
       const seatKey = `${row}:${seat}`;
 
-      if (!Array.isArray(schedule.taken)) {
-        schedule.taken = [];
+      if (schedule.taken?.includes(seatKey)) {
+        throw new BadRequestException(`Место ${seatKey} занято`);
       }
 
-      if (schedule.taken.includes(seatKey)) {
-        throw new ConflictException(`Место ${seatKey} уже занято`);
-      }
+      schedule.taken = schedule.taken
+        ? `${schedule.taken},${seatKey}`
+        : seatKey;
 
-      schedule.taken.push(seatKey);
-
+      await this.filmsRepository.updateFilmSession(session, schedule.taken);
       orderTickets.push({
-        film: filmId,
-        session: sessionId,
-        dayTime,
+        film,
+        session,
         row,
         seat,
-        price,
+        dayTime: schedule.daytime,
+        price: schedule.price,
       });
     }
 
