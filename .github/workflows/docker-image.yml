@@ -13,19 +13,20 @@ jobs:
       packages: write
       contents: write
     steps:
-      - name: Set up GitHub Actions
-        run: /
-          echo "REPO=${OWNER,,}" >>${GITHUB_ENV}
-        env:
-          OWNER: '${{ github.repository_owner }}'
-
-      - run: /
-          echo "repo ${REPO}"
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set uo QEMU
+      - name: Set up GitHub Actions
+        run: |
+          echo "REPO=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
+    
+      - name: Debug REPO
+        run: |
+          echo "repo=${REPO}"
+
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
@@ -35,27 +36,27 @@ jobs:
         uses: docker/login-action@v3      
         with:
           registry: ghcr.io
-          username: ${{ github.actor}}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
 # Backend
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v6
         with:
-            context: '{{defaultContext}}:backend'
-            push: true
-            tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-backend:latest'
+          context: ./backend
+          push: true
+          tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-backend:latest'
   # frontend
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
-            context: '{{defaultContext}}:frontend'
-            push: true
-            tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-frontend:latest' 
+          context: ./frontend
+          push: true
+          tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-frontend:latest' 
   # njinx
       - name: Build and push server
         uses: docker/build-push-action@v6
         with:
-            context: '{{defaultContext}}:nginx'
-            push: true
-            tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-server:latest   
+          context: ./nginx
+          push: true
+          tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-server:latest   
