@@ -59,4 +59,4 @@ jobs:
         with:
           context: ./nginx
           push: true
-          tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-server:latest   
+          tags: 'ghcr.io/${{ env.REPO }}/film-react-nest-server:latest'   
