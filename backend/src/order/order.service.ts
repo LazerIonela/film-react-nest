@@ -1,17 +1,15 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import {
   CreateOrderDTO,
-  // CreateOrderDTO,
   OrderResponseDTO,
   TicketDetailDTO,
 } from './dto/order.dto';
-import { FilmsRepository } from 'src/repository/films.repository';
+import { FilmsRepository } from '../repository/films.repository';
 
 @Injectable()
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
-  // async createOrder(tickets: TicketDetailDTO[]): Promise<OrderResponseDTO> {
   async createOrder(order: CreateOrderDTO): Promise<OrderResponseDTO> {
     const orderTickets: TicketDetailDTO[] = [];
 
