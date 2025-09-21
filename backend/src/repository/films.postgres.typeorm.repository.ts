@@ -8,7 +8,7 @@ export class FilmsPostgresTypeOrmRepository implements FilmsRepository {
   constructor(private filmRepository: Repository<Film>) {}
 
   async findAll(): Promise<FilmResponseDTO> {
-    const films = await this.filmRepository.find({ relations: ['schedules'] });
+    const films = await this.filmRepository.find({ relations: ['schedule'] });
     return {
       total: films.length,
       items: films.map(this.filmToDtoMapper()),
@@ -17,7 +17,7 @@ export class FilmsPostgresTypeOrmRepository implements FilmsRepository {
   async findById(id: string): Promise<FilmDTO> {
     const films = await this.filmRepository.findOne({
       where: { id },
-      relations: ['schedules'],
+      relations: ['schedule'],
     });
     return films ? this.filmToDtoMapper()(films) : null;
   }
