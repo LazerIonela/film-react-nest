@@ -1,7 +1,7 @@
-#!/bin/bash
-set -e
+\set ON_ERROR_STOP on
+\connect film-react-nest
 
-psql -v ON_ERROR_STOP=1 --username "POSTGRES_USER" --dbname "$POSTGRES_DB"
-<<EOSQL
- GRANT ALL ON ALL TABLES IN SCHEMA public TO $DATABASE_USERNAME;
-EOSQL
+GRANT ALL PRIVILEGES ON DATABASE "film-react-nest" TO student;
+GRANT ALL ON ALL TABLES    IN SCHEMA public TO student;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO student;
+
