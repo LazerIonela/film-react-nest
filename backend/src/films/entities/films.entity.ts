@@ -12,10 +12,8 @@ export class Film {
   @Column()
   director: string;
 
-  @Column()
-  tags: string;
-  // @Column('simple-array')
-  // tags: string[];
+  @Column('simple-array')
+  tags: string[];
 
   @Column()
   image: string;
@@ -32,6 +30,11 @@ export class Film {
   @Column()
   description: string;
 
-  @OneToMany(() => Schedule, (schedule) => schedule.film)
-  schedules: Schedule[];
+  @OneToMany(() => Schedule, (schedule) => schedule.film, {
+    eager: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  schedule?: Schedule[];
 }

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilmsService } from './films.service';
 import { fixtures } from './films.fixtures';
-import { FilmsRepository } from '../repository/films.repository';
+import { FilmsRepository } from '../repository/films.postgres.typeorm.repository';
 
 describe('FilmsService', () => {
   let service: FilmsService;

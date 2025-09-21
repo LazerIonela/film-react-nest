@@ -4,11 +4,11 @@ import { fixtures as filmFixtures } from '../films/films.fixtures';
 // Используем реальный ID сеанса из фикстуры фильма
 const ticket: TicketDetailDTO = {
   film: filmFixtures.film.title,
-  session: filmFixtures.film.schedules[0].id, // UUID из фильма
-  dayTime: filmFixtures.film.schedules[0].daytime,
+  session: filmFixtures.film.schedule[0].id, // UUID из фильма
+  dayTime: filmFixtures.film.schedule[0].daytime,
   row: 1,
   seat: 2,
-  price: filmFixtures.film.schedules[0].price,
+  price: filmFixtures.film.schedule[0].price,
 };
 
 const order: CreateOrderDTO = {

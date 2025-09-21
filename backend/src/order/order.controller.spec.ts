@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
-import { FilmsRepository } from '../repository/films.repository';
+import { FilmsRepository } from '../repository/films.postgres.typeorm.repository';
 import { fixtures as filmFixtures } from '../films/films.fixtures';
 import { fixtures } from './order.fixtures';
 import { BadRequestException } from '@nestjs/common';
