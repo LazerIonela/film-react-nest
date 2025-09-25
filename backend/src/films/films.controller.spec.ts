@@ -10,7 +10,7 @@ describe('FilmsController', () => {
   beforeEach(async () => {
     const mockFilmsService = {
       getAllFilms: jest.fn().mockResolvedValue(fixtures.films),
-      getFilmSchedule: jest.fn().mockResolvedValue(fixtures.film.schedules),
+      getFilmSchedule: jest.fn().mockResolvedValue(fixtures.film.schedule),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -39,7 +39,7 @@ describe('FilmsController', () => {
 
   it('should get film schedule', async () => {
     const schedule = await controller.getFilmSchedule(fixtures.film.id);
-    expect(schedule).toEqual(fixtures.film.schedules);
+    expect(schedule).toEqual(fixtures.film.schedule);
     expect(filmsService.getFilmSchedule).toHaveBeenCalledWith(fixtures.film.id);
   });
 });
