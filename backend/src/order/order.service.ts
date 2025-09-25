@@ -1,46 +1,54 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 import {
   CreateOrderDTO,
-  // CreateOrderDTO,
   OrderResponseDTO,
   TicketDetailDTO,
 } from './dto/order.dto';
-import { FilmsRepository } from 'src/repository/films.repository';
+import { AppRepository } from '../app.repository.module';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly filmsRepository: FilmsRepository) {}
+  constructor(
+    @Inject('REPOSITORY') private readonly repository: AppRepository,
+  ) {}
 
-  // async createOrder(tickets: TicketDetailDTO[]): Promise<OrderResponseDTO> {
   async createOrder(order: CreateOrderDTO): Promise<OrderResponseDTO> {
     const orderTickets: TicketDetailDTO[] = [];
 
     for (const ticket of order.tickets) {
-      const { film, session, row, seat } = ticket;
+      const { film: filmId, session: sessionId, row, seat } = ticket;
 
-      const currentFilm = await this.filmsRepository.findById(film);
+      const currentFilm = await this.repository.films.findById(filmId);
 
       if (!currentFilm) {
-        throw new BadRequestException(`Фильм с id=${film} не найден`);
+        throw new BadRequestException(`Фильм с id=${filmId} не найден`);
       }
-      const schedule = currentFilm.schedules.find((s) => s.id === session);
+      const schedule = currentFilm.schedule.find((s) => s.id === sessionId);
       if (!schedule) {
-        throw new BadRequestException(`Сеанс с id ${session} не найден`);
+        throw new BadRequestException(`Сеанс с id ${sessionId} не найден`);
       }
       const seatKey = `${row}:${seat}`;
+      const taken = Array.isArray(schedule.taken) ? schedule.taken : [];
 
-      if (schedule.taken?.includes(seatKey)) {
+      if (taken.includes(seatKey)) {
         throw new BadRequestException(`Место ${seatKey} занято`);
       }
 
-      schedule.taken = schedule.taken
-        ? `${schedule.taken},${seatKey}`
-        : seatKey;
+      const updatedTaken = [...(schedule.taken ?? []), seatKey];
 
-      await this.filmsRepository.updateFilmSession(session, schedule.taken);
+      const updatedSchedules = currentFilm.schedule.map((s) =>
+        s.id === sessionId ? { ...s, taken: updatedTaken } : s,
+      );
+
+      await this.repository.films.updateFilmSession({
+        ...currentFilm,
+        id: filmId,
+        schedule: updatedSchedules,
+      });
+
       orderTickets.push({
-        film,
-        session,
+        film: filmId,
+        session: sessionId,
         row,
         seat,
         dayTime: schedule.daytime,
